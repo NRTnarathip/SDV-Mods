@@ -160,8 +160,8 @@ internal class ItemMenu : ItemGrabMenu
 
 
     /*********
-    ** Public methods
-    *********/
+  ** Public methods
+  *********/
     /// <summary>Construct an instance.</summary>
     /// <param name="spawnableItems">The items available to spawn.</param>
     /// <param name="textEntryManager">Manages the gamepad text entry UI.</param>
@@ -171,7 +171,8 @@ internal class ItemMenu : ItemGrabMenu
     /// <param name="reclaimPriceInTrashCan">Whether the trash can upgrade which reclaims part of the price of the destroyed items is applied in the item spawner menu too.</param>
     public ItemMenu(SpawnableItem[] spawnableItems, TextEntryManager textEntryManager, ModItemData data, IModContentHelper content, IMonitor monitor, bool reclaimPriceInTrashCan)
         : base(
-            inventory: new List<Item>(),
+            //fix bug for Android, need to set capacity to 1 or more
+            inventory: new List<Item>(1),
             reverseGrab: false,
             showReceivingMenu: true,
             highlightFunction: _ => true,
@@ -435,12 +436,25 @@ internal class ItemMenu : ItemGrabMenu
         // draw background overlay
         spriteBatch.Draw(Game1.fadeToBlackRect, new Rectangle(0, 0, Game1.uiViewport.Width, Game1.uiViewport.Height), Color.Black * 0.5f);
 
-        // draw arrows under base UI, so tooltips are drawn over them
-        if (this.CanScrollUp)
-            this.UpArrow.draw(spriteBatch);
-        if (this.CanScrollDown)
-            this.DownArrow.draw(spriteBatch);
-        this.BaseDraw(spriteBatch);
+        if (this.IsAndroid)
+        {
+            //draw base first
+            this.BaseDraw(spriteBatch);
+            //draw arrow overlay
+            if (this.CanScrollUp)
+                this.UpArrow.draw(spriteBatch);
+            if (this.CanScrollDown)
+                this.DownArrow.draw(spriteBatch);
+        }
+        else
+        {
+            // draw arrows under base UI, so tooltips are drawn over them
+            if (this.CanScrollUp)
+                this.UpArrow.draw(spriteBatch);
+            if (this.CanScrollDown)
+                this.DownArrow.draw(spriteBatch);
+            this.BaseDraw(spriteBatch);
+        }
 
         // draw search box
         CommonHelper.DrawTab(this.SearchBoxBounds.X, this.SearchBoxBounds.Y - CommonHelper.ButtonBorderWidth / 2, this.SearchBoxBounds.Width - CommonHelper.ButtonBorderWidth * 3 / 2, this.SearchBoxBounds.Height - CommonHelper.ButtonBorderWidth, out _, drawShadow: this.IsAndroid);
@@ -605,9 +619,20 @@ internal class ItemMenu : ItemGrabMenu
         // move layout for Android
         if (this.IsAndroid)
         {
-            this.UpArrow.bounds.X = this.upperRightCloseButton.bounds.Center.X - this.SortButton.bounds.Width / 2;
-            this.UpArrow.bounds.Y = this.upperRightCloseButton.bounds.Bottom;
-            this.DownArrow.bounds.X = this.UpArrow.bounds.X;
+            const int arrowUpDownBetweenOffset = 60;
+            //align position from trash can
+            int arrowPosX = this.trashCan.bounds.Right;
+            //pick item slot row 2
+            var itemSlotCenter = this.ItemsToGrabMenu.inventory[23].bounds;
+            int arrowPosY = itemSlotCenter.Y + (int)(itemSlotCenter.Height / 2f);
+            arrowPosY -= (int)(this.UpArrow.bounds.Height / 2f);
+
+            this.UpArrow.bounds.X = arrowPosX;
+            this.DownArrow.bounds.X = arrowPosX;
+
+            this.UpArrow.bounds.Y = arrowPosY - arrowUpDownBetweenOffset;
+            this.DownArrow.bounds.Y = arrowPosY + arrowUpDownBetweenOffset;
+
         }
 
         // controller flow

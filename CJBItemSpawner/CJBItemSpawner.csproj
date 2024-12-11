@@ -3,6 +3,8 @@
     <Version>2.5.1</Version>
 
     <TranslationClassBuilder_AddGetByKey>true</TranslationClassBuilder_AddGetByKey>
+
+    <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -11,4 +13,10 @@
   </ItemGroup>
 
   <Import Project="..\Common\Common.projitems" Label="Shared" />
+
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="&quot;$(ProjectDir)PostBuild.cmd&quot;" />
+  </Target>
+
+
 </Project>
