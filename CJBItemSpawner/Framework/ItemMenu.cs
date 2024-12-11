@@ -171,8 +171,8 @@ internal class ItemMenu : ItemGrabMenu
     /// <param name="reclaimPriceInTrashCan">Whether the trash can upgrade which reclaims part of the price of the destroyed items is applied in the item spawner menu too.</param>
     public ItemMenu(SpawnableItem[] spawnableItems, TextEntryManager textEntryManager, ModItemData data, IModContentHelper content, IMonitor monitor, bool reclaimPriceInTrashCan)
         : base(
-            //fix bug for Android, need to set capacity to 1 or more
-            inventory: new List<Item>(1),
+            //fix bug for Android
+            inventory: new List<Item>() { null },
             reverseGrab: false,
             showReceivingMenu: true,
             highlightFunction: _ => true,
